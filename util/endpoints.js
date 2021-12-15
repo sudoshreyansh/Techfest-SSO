@@ -2,7 +2,8 @@ const endpoints = {
     MFA: '/api/mfa/verify',
     AccountActivate: '/api/activate',
     Register: '/api/register',
-    Login: '/api/login'
+    Login: '/api/login',
+    GenerateGrant: '/api/sso/grant'
 };
 
 for ( endpoint in endpoints ) {
