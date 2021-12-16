@@ -19,14 +19,16 @@ async function success( req, res ) {
         sessionId: req.session.sessionId
     }));
     authCode = JSON.parse(authCode);
-    console.log(authCode.code);
-    res.redirect(req.session.redirect_uri + `?code=${authCode.code}&state=${req.session.state}`);
+    res.redirect(req.session.redirect_uri + `?code=${authCode.code}&state=${req.session.state}&mfa=${req.session.mfa ? '1' : '0'}`);
 }
 
 async function checkAuthenticated( req, res, next ) {
-    console.log(req.url);
-    if ( req.session.sessionId && req.url !== '/success' ) {
-        res.redirect('/success');
+    if ( req.session.sessionId && req.url !== '/success' && req.url !== '/verification' ) {
+        if ( req.session.mfa ) {
+            res.redirect('/verification');
+        } else {
+            res.redirect('/success');
+        }        
     } else {
         next();
     }
@@ -39,6 +41,7 @@ async function saveSSOData(req, res, next) {
     ) {
         req.session.redirect_uri = req.query.redirect_uri;
         req.session.state = req.query.state;
+        req.session.mfa = (req.query.mfa === '1');
     }
 
     next();
@@ -59,15 +62,31 @@ async function signup( req, res ) {
 async function login( req, res ) {
     let response = await sendRequest(endpoints.Login, JSON.stringify(req.body));
     response = JSON.parse(response);
-    console.log(response);
 
     if ( !response.error ) {
-        req.session.userId = response.userId;
-        req.session.sessionId = response.id;
-        res.redirect("/success");
+        if ( response.id ) {
+            req.session.userId = response.userId;
+            req.session.sessionId = response.id;
+            if ( req.session.mfa ) {
+                res.redirect('/verification');
+            } else {
+                res.redirect("/success");   
+            }
+        } else {
+            req.session.userId = response.userId;
+            res.redirect('/activate');
+        }
     } else {
         res.redirect("/");
     }
+}
+
+async function renderVerification( req, res ) {
+    let response = await sendRequest(endpoints.MFA, JSON.stringify({
+        userId: req.session.userId
+    }));
+    response = JSON.parse(response);
+    res.render('mfa');
 }
 
 async function verification( req, res ) {
@@ -78,6 +97,7 @@ async function verification( req, res ) {
     response = JSON.parse(response);
     
     if ( !response.error ) {
+        req.session.mfa = true;
         res.redirect('/success');
     } else {
         res.redirect('/verification');
@@ -106,5 +126,6 @@ module.exports = {
     activate,
     checkAuthenticated,
     success,
-    saveSSOData
+    saveSSOData,
+    renderVerification
 }

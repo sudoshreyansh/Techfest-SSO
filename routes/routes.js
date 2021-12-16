@@ -12,7 +12,7 @@ router.post('/signup', controller.signup);
 router.post('/', controller.login);
 router.get('/', controller.render('login'));
 
-router.get('/verification', controller.render('mfa'));
+router.get('/verification', controller.renderVerification);
 router.post('/verification', controller.verification);
 
 router.get('/activate', controller.render('mfa'));
