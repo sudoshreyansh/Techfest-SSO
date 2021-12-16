@@ -24,9 +24,8 @@ app.get("/logout", (req, res) => {
     if (err) {
       return console.log(err);
     }
-    res.redirect("/profile");
+    res.redirect("/");
   });
-  res.redirect(`/`);
 });
 
 app.listen(process.env.PORT, () => console.log(`Server is listening on port ${process.env.PORT}`));

@@ -11,7 +11,7 @@ async function success( req, res ) {
     if (
         typeof req.session.redirect_uri !== 'string'
     ) {
-        res.send('success');
+        res.render('success');
         return;
     }
 
