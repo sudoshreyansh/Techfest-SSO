@@ -17,3 +17,8 @@ MICROSERVICE_URL = <url of authentication microservice>
 
 and then run `node app.js` to run the SSO server.
 
+## Tech Stack
+
+- Node JS
+- Express JS
+- EJS
